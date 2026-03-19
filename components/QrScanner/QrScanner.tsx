@@ -11,6 +11,7 @@ const ELEMENT_ID = 'qr-reader-container';
 
 export const QrScanner: React.FC<QrScannerProps> = ({ onResult }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const { 
     startScanner, 
@@ -26,8 +27,29 @@ export const QrScanner: React.FC<QrScannerProps> = ({ onResult }) => {
   } = useQrScanner({
     elementId: ELEMENT_ID,
     onScanSuccess: (decodedText) => {
+      // Haptic Feedback
+      if (typeof window !== 'undefined' && window.navigator.vibrate) {
+        window.navigator.vibrate(100);
+      }
+
+      setShowSuccess(true);
       onResult(decodedText);
       stopScanner();
+
+      // Scroll to result (for mobile)
+      setTimeout(() => {
+        const resultsElement = document.getElementById('results-container');
+        if (resultsElement) {
+          resultsElement.scrollIntoView({ behavior: 'smooth' });
+        } else {
+          window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+      }, 100);
+
+      // Auto-hide success state after 1.5s to allow re-scanning
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 2500);
     },
     qrbox: { width: 250, height: 250 },
   });
@@ -63,6 +85,18 @@ export const QrScanner: React.FC<QrScannerProps> = ({ onResult }) => {
           (status === 'idle' || status === 'stopped' || hasPermissionError || error) ? 'hidden' : 'block'
         }`} 
       />
+
+      {/* Success Overlay */}
+      {showSuccess && (
+        <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-green-500/20 backdrop-blur-[2px] animate-in fade-in duration-300">
+          <div className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center shadow-lg shadow-green-500/50 animate-bounce-short">
+            <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={4} d="M5 13l4 4L19 7" />
+            </svg>
+          </div>
+          <p className="mt-4 text-white font-bold text-xl drop-shadow-md animate-pulse">Success!</p>
+        </div>
+      )}
 
       {/* Manual Start / Placeholder View */}
       {(status === 'idle' || status === 'stopped') && !isInitializing && !isAnalyzingImage && (
@@ -172,8 +206,15 @@ export const QrScanner: React.FC<QrScannerProps> = ({ onResult }) => {
           0% { transform: translateY(0); }
           100% { transform: translateY(250px); }
         }
+        @keyframes bounce-short {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-10px); }
+        }
         .animate-scan-line {
           animation: scan-line 2.5s ease-in-out infinite;
+        }
+        .animate-bounce-short {
+          animation: bounce-short 0.5s ease-in-out 2;
         }
         #qr-reader-container video {
           object-fit: cover !important;

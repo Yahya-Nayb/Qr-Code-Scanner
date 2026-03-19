@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -12,16 +12,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+
 export const metadata: Metadata = {
-  title: "GeScanner - Advanced Online QR Scanner & AI Reader",
-  description: "Scan QR codes instantly from your camera or image files. GeScanner is a secure, no-install online tool with 100% privacy and lightning-fast results.",
-  keywords: ["Online QR Scanner", "Scan QR from Image", "No-install QR Reader", "Free QR Scanner", "Secure QR Reader"],
-  authors: [{ name: "GeScanner Team" }],
-  viewport: "width=device-width, initial-scale=1",
+  title: "GeScanner - Privacy-First QR Scanner",
+  description: "Fast, secure, and modern QR code scanner.",
   icons: {
     icon: "/ge.png",
   },
 };
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#000000",
+};
+
 
 export default function RootLayout({
   children,
