@@ -10,44 +10,62 @@ interface QrScannerProps {
 const ELEMENT_ID = 'qr-reader-container';
 
 export const QrScanner: React.FC<QrScannerProps> = ({ onResult }) => {
-  const [hasScanned, setHasScanned] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   const { 
     startScanner, 
     stopScanner, 
     resetScanner,
+    scanImage,
     status, 
     errorMessage, 
     error,
     hasPermissionError,
-    isInitializing
+    isInitializing,
+    isAnalyzingImage
   } = useQrScanner({
     elementId: ELEMENT_ID,
     onScanSuccess: (decodedText) => {
       onResult(decodedText);
-      setHasScanned(true);
       stopScanner();
     },
     qrbox: { width: 250, height: 250 },
   });
 
-  const handleScanAgain = () => {
-    setHasScanned(false);
-    resetScanner();
+  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      scanImage(file);
+    }
+    // Reset input value so same file can be selected again
+    e.target.value = '';
+  };
+
+  const triggerFileUpload = () => {
+    fileInputRef.current?.click();
   };
 
   return (
     <div className="w-full h-full relative overflow-hidden rounded-xl bg-black">
+      {/* Hidden file input */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileUpload}
+        accept="image/*"
+        className="hidden"
+      />
+
       {/* The video container for html5-qrcode */}
       <div 
         id={ELEMENT_ID} 
         className={`w-full h-full bg-black ${
-          (status === 'idle' || hasPermissionError || error || hasScanned) ? 'hidden' : 'block'
+          (status === 'idle' || status === 'stopped' || hasPermissionError || error) ? 'hidden' : 'block'
         }`} 
       />
 
       {/* Manual Start / Placeholder View */}
-      {status === 'idle' && !isInitializing && (
+      {(status === 'idle' || status === 'stopped') && !isInitializing && !isAnalyzingImage && (
         <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-[#141414]">
           <div className="w-20 h-20 bg-[#262626] rounded-full flex items-center justify-center mb-6">
             <svg className="w-10 h-10 text-[#666666]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,20 +73,48 @@ export const QrScanner: React.FC<QrScannerProps> = ({ onResult }) => {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
             </svg>
           </div>
-          <button
-            onClick={startScanner}
-            className="px-10 py-4 bg-[#e01a4f] hover:bg-[#c41644] text-white rounded-2xl font-bold transition-all shadow-xl shadow-[#e01a4f]/20 transform hover:scale-105"
-          >
-            Start Scanner
-          </button>
+          
+          <div className="flex flex-col w-full max-w-[240px] gap-3">
+            <button
+              onClick={startScanner}
+              className="w-full px-10 cursor-pointer py-4 bg-[#e01a4f] hover:bg-[#c41644] text-white rounded-2xl font-bold transition-all shadow-xl shadow-[#e01a4f]/20 transform hover:scale-105"
+            >
+              Start Camera
+            </button>
+            
+            <button
+              onClick={triggerFileUpload}
+              className="w-full px-10 py-4 cursor-pointer bg-[#262626] hover:bg-[#333333] text-white border border-white/10 rounded-2xl font-bold transition-all transform hover:scale-105 flex items-center justify-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              Upload Image
+            </button>
+          </div>
         </div>
       )}
 
       {/* Loading State / Spinner */}
-      {isInitializing && (
+      {(isInitializing || isAnalyzingImage) && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm z-10">
           <div className="w-12 h-12 border-4 border-[#e01a4f]/30 border-t-[#e01a4f] rounded-full animate-spin mb-4" />
-          <p className="text-[#e01a4f] font-semibold text-sm animate-pulse">Initializing Camera...</p>
+          <p className="text-[#e01a4f] font-semibold text-sm animate-pulse">
+            {isAnalyzingImage ? 'Analyzing Image...' : 'Initializing Camera...'}
+          </p>
+        </div>
+      )}
+
+      {/* Stop Button Overlay */}
+      {status === 'scanning' && !isInitializing && (
+        <div className="absolute bottom-5 left-0 right-0 flex justify-center z-20 animate-in slide-in-from-bottom-4 duration-300">
+          <button
+            onClick={stopScanner}
+            className="group cursor-pointer flex items-center gap-2 px-6 py-3 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-red-500/20 hover:border-red-500/40 text-white rounded-2xl font-bold transition-all active:scale-95 shadow-2xl"
+          >
+            <div className="w-3 h-3 bg-red-500 rounded-sm group-hover:scale-110 transition-transform" />
+            <span>Stop Scanner</span>
+          </button>
         </div>
       )}
 
@@ -98,30 +144,26 @@ export const QrScanner: React.FC<QrScannerProps> = ({ onResult }) => {
               {error || errorMessage || 'Failed to start camera.'}
             </p>
           </div>
-          <button
-            onClick={startScanner}
-            className="px-8 py-3 bg-[#e01a4f] hover:bg-[#c41644] text-white rounded-xl font-bold transition-all shadow-lg shadow-[#e01a4f]/20 flex items-center gap-2"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Retry
-          </button>
-        </div>
-      )}
-
-      {/* "Scan Again" Overlay (Post-Success) */}
-      {hasScanned && (
-        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center animate-in fade-in duration-300">
-          <button
-            onClick={handleScanAgain}
-            className="flex items-center space-x-3 bg-[#e01a4f] hover:bg-[#c41644] text-white px-8 py-4 rounded-2xl font-bold transition-all transform hover:scale-105 shadow-xl shadow-[#e01a4f]/30"
-          >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            <span className="text-lg">Scan again</span>
-          </button>
+          <div className="flex flex-col w-full max-w-[200px] gap-3">
+            <button
+              onClick={startScanner}
+              className="px-8 py-3 cursor-pointer bg-[#e01a4f] hover:bg-[#c41644] text-white rounded-xl font-bold transition-all shadow-lg shadow-[#e01a4f]/20 flex items-center justify-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Retry Camera
+            </button>
+            <button
+              onClick={triggerFileUpload}
+              className="px-8 py-3 cursor-pointer bg-[#262626] hover:bg-[#333333] text-white border border-white/10 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+              </svg>
+              Try Image
+            </button>
+          </div>
         </div>
       )}
 

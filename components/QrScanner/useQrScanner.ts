@@ -17,7 +17,7 @@ export function useQrScanner({
   elementId,
   onScanSuccess,
   onScanError,
-  fps = 10,
+  fps = 20,
   qrbox = 250,
 }: UseQrScannerProps) {
   const scannerRef = useRef<Html5Qrcode | null>(null);
@@ -30,6 +30,7 @@ export function useQrScanner({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [hasPermissionError, setHasPermissionError] = useState(false);
   const [isInitializing, setIsInitializing] = useState(false);
+  const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -53,6 +54,40 @@ export function useQrScanner({
       }
     }
   }, []);
+
+  const scanImage = useCallback(async (file: File) => {
+    if (isTransitioningRef.current) return;
+
+    try {
+      setIsAnalyzingImage(true);
+      isTransitioningRef.current = true;
+      setErrorMessage(null);
+      setError(null);
+
+      if (!scannerRef.current) {
+        scannerRef.current = new Html5Qrcode(elementId);
+      }
+
+      // Ensure camera is stopped before file scanning
+      if (scannerRef.current.isScanning) {
+        await scannerRef.current.stop();
+      }
+
+      const result = await scannerRef.current.scanFileV2(file, false);
+      if (result && result.decodedText) {
+        successCallbackRef.current(result.decodedText);
+      }
+    } catch (err) {
+      console.error('Image scan error:', err);
+      const errorStr = 'No QR code found in this image. Please try another one.';
+      setError(errorStr);
+      setErrorMessage(errorStr);
+      setStatus('error');
+    } finally {
+      setIsAnalyzingImage(false);
+      isTransitioningRef.current = false;
+    }
+  }, [elementId]);
 
   const startScanner = useCallback(async () => {
     if (isTransitioningRef.current) return;
@@ -126,10 +161,12 @@ export function useQrScanner({
     startScanner,
     stopScanner,
     resetScanner,
+    scanImage,
     status,
     errorMessage,
     error,
     hasPermissionError,
     isInitializing,
+    isAnalyzingImage,
   };
 }
