@@ -149,16 +149,16 @@ export default function Home() {
 
         {/* SEO Content Section */}
         <section className="max-w-6xl mx-auto mt-12 p-8 md:p-12 bg-[#141414]/50 border border-[#262626] rounded-[2.5rem] text-gray-300">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-            {/* English SEO Content */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 text-left">
+            {/* Primary Feature Set */}
             <div className="space-y-6">
-              <h2 className="text-2xl font-bold text-white tracking-tight">Online QR Scanner & No-install QR Reader</h2>
+              <h2 className="text-2xl font-bold text-white tracking-tight">Enterprise-Grade Document Processing</h2>
               <p className="leading-relaxed text-gray-400">
-                Welcome to YNScanner, the ultimate Online QR Scanner and No-install QR Reader. Our tool provides a lightning-fast, secure way to scan URLs and text directly from your browser. Whether
-                you need to Scan from Image files or use your live camera, YNScanner ensures 100% privacy with client-side processing.
+                Welcome to YNScanner, the high-velocity tool for digital document extraction. Our engine provides a lightning-fast, secure way to process unstructured data directly from your browser.
+                Whether you need to extract data from legacy image files or utilize live-feed scanning, YNScanner ensures 100% data integrity with localized processing.
               </p>
               <ul className="space-y-3">
-                {['Instant Browser-based Scanning', 'Secure Client-side Processing', 'Support for Camera and Image Upload', 'Privacy Focused - No Data Sent to Server'].map((item, idx) => (
+                {['Direct Browser-based Extraction', 'Localized Secure Computation', 'High-Resolution Camera Support', 'Zero Server-Side Retention Policy'].map((item, idx) => (
                   <li key={idx} className="flex items-center space-x-3 text-sm">
                     <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     <span>{item}</span>
@@ -167,17 +167,17 @@ export default function Home() {
               </ul>
             </div>
 
-            {/* Arabic SEO Content */}
-            <div className="space-y-6 text-right" dir="rtl">
-              <h2 className="text-2xl font-bold text-white tracking-tight font-sans">قارئ رموز QR أونلاين وبدون تثبيت تطبيقات</h2>
+            {/* Technical Optimization Details */}
+            <div className="space-y-6">
+              <h2 className="text-2xl font-bold text-white tracking-tight">Security & Performance Architecture</h2>
               <p className="leading-relaxed text-gray-400">
-                مرحباً بكم في YNScanner، الخيار الأفضل لـ قراءة رموز QR أونلاين بدون تثبيت تطبيقات. توفر أداتنا طريقة فائقة السرعة وآمنة لمسح الروابط والنصوص مباشرة من متصفحك. سواء كنت بحاجة لـ المسح
-                من الصور المخزنة أو استخدام الكاميرا الحية، يضمن YNScanner خصوصية تامة حيث تتم جميع العمليات محلياً على جهازك.
+                Engineered for low-latency operations, the YNScanner infrastructure eliminates the need for third-party application installs. By utilizing client-side logic, we minimize operational
+                friction and ensure that sensitive information never leaves your environment, providing a true private-by-design utility.
               </p>
               <ul className="space-y-3">
-                {['مسح فوري عبر المتصفح', 'معالجة آمنة محلياً على جهازك', 'دعم الكاميرا ورفع ملفات الصور', 'تركيز على الخصوصية - لا يتم إرسال بيانات للسيرفر'].map((item, idx) => (
+                {['End-to-End Client-Side Execution', 'Pattern Recognition Optimization', 'Cross-Platform Browser Compatibility', 'Encrypted Local Metadata Handling'].map((item, idx) => (
                   <li key={idx} className="flex items-center space-x-3 text-sm">
-                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 ml-3" />
+                    <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                     <span>{item}</span>
                   </li>
                 ))}
