@@ -1,5 +1,5 @@
 {
-  "name": "qr_scanner",
+  "name": "yn-scanner",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -13,6 +13,9 @@
     "next": "16.1.7",
     "react": "19.2.3",
     "react-dom": "19.2.3"
+  },
+  "overrides": {
+    "next": "$next"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
